@@ -38,11 +38,11 @@ namespace rpt_diff.RptConvert.Converters
 
         private static void Process(SubreportClientDocument scd, XmlWriter xmlw)
         {
-            xmlw.WriteAttributeString("EnableOnDemand", scd.EnableOnDemand.ToStringSafe());
-            xmlw.WriteAttributeString("EnableReimport", scd.EnableReimport.ToStringSafe());
-            xmlw.WriteAttributeString("IsImported", scd.IsImported.ToStringSafe());
-            xmlw.WriteAttributeString("Name", scd.Name);
-            xmlw.WriteAttributeString("SubreportLocation", scd.SubreportLocation);
+            xmlw.WriteElementString("EnableOnDemand", scd.EnableOnDemand.ToStringSafe());
+            xmlw.WriteElementString("EnableReimport", scd.EnableReimport.ToStringSafe());
+            xmlw.WriteElementString("IsImported", scd.IsImported.ToStringSafe());
+            xmlw.WriteElementString("Name", scd.Name);
+            xmlw.WriteElementString("SubreportLocation", scd.SubreportLocation);
             Process(scd.DatabaseController, xmlw);
             Process(scd.DataDefController, xmlw);
             Process(scd.ReportDefController, xmlw);

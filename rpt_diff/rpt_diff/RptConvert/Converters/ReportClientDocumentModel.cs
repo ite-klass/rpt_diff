@@ -14,17 +14,17 @@ namespace rpt_diff.RptConvert.Converters
         public static void ProcessReport(ISCDReportClientDocument report, XmlWriter xmlw, string reportDoc = "ReportClientDocument")
         {
             xmlw.WriteStartElement(reportDoc);
-            xmlw.WriteAttributeString("DisplayName", report.DisplayName);
-            xmlw.WriteAttributeString("IsModified", report.IsModified.ToStringSafe());
-            xmlw.WriteAttributeString("IsOpen", report.IsOpen.ToStringSafe());
-            xmlw.WriteAttributeString("IsReadOnly", report.IsReadOnly.ToStringSafe());
-            xmlw.WriteAttributeString("LocaleID", report.LocaleID.ToStringSafe());
-            xmlw.WriteAttributeString("MajorVersion", report.MajorVersion.ToStringSafe());
-            xmlw.WriteAttributeString("MinorVersion", report.MinorVersion.ToStringSafe());
-            xmlw.WriteAttributeString("Path", report.Path);
-            xmlw.WriteAttributeString("PreferredViewingLocaleID", report.PreferredViewingLocaleID.ToStringSafe());
-            xmlw.WriteAttributeString("ProductLocaleID", report.ProductLocaleID.ToStringSafe());
-            xmlw.WriteAttributeString("ReportAppServer", report.ReportAppServer);
+            xmlw.WriteElementString("DisplayName", report.DisplayName);
+            xmlw.WriteElementString("IsModified", report.IsModified.ToStringSafe());
+            xmlw.WriteElementString("IsOpen", report.IsOpen.ToStringSafe());
+            xmlw.WriteElementString("IsReadOnly", report.IsReadOnly.ToStringSafe());
+            xmlw.WriteElementString("LocaleID", report.LocaleID.ToStringSafe());
+            xmlw.WriteElementString("MajorVersion", report.MajorVersion.ToStringSafe());
+            xmlw.WriteElementString("MinorVersion", report.MinorVersion.ToStringSafe());
+            xmlw.WriteElementString("Path", report.Path);
+            xmlw.WriteElementString("PreferredViewingLocaleID", report.PreferredViewingLocaleID.ToStringSafe());
+            xmlw.WriteElementString("ProductLocaleID", report.ProductLocaleID.ToStringSafe());
+            xmlw.WriteElementString("ReportAppServer", report.ReportAppServer);
             Controllers.Process(report.CustomFunctionController, xmlw);
             Controllers.Process(report.DatabaseController, xmlw);
             Controllers.Process(report.DataDefController, xmlw);
