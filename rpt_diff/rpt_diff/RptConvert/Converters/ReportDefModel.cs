@@ -1,18 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml;
-
+﻿using System.Xml;
 using CrystalDecisions.ReportAppServer.ReportDefModel;
 using CrystalDecisions.ReportAppServer.DataDefModel;
 
-using ExtensionMethods;
-
-namespace rpt_diff
+namespace rpt_diff.RptConvert.Converters
 {
-    class ReportDefModel
+    public class ReportDefModel
     {
         public static void ProcessReportOptions(ReportOptions ro, XmlWriter xmlw)
         {
@@ -34,7 +26,7 @@ namespace rpt_diff
             xmlw.WriteEndElement();
         }
 
-        public static void ProcessPrintOptions(PrintOptions po, XmlWriter xmlw)
+        public static void Process(PrintOptions po, XmlWriter xmlw)
         {
             xmlw.WriteStartElement("PrintOptions");
             xmlw.WriteAttributeString("DissociatePageSizeAndPrinterPaperSize", po.DissociatePageSizeAndPrinterPaperSize.ToStringSafe());
@@ -67,7 +59,7 @@ namespace rpt_diff
             xmlw.WriteAttributeString("TopFormula", pm.PageMarginConditionFormulas[CrPageMarginConditionFormulaTypeEnum.crPageMarginConditionFormulaTypeTop].Text);
             xmlw.WriteEndElement();
         }
-        public static void ProcessSavedXMLExportFormats(XMLExportFormats xefs, XmlWriter xmlw)
+        public static void Process(XMLExportFormats xefs, XmlWriter xmlw)
         {
             xmlw.WriteStartElement("XmlExportFormats");
             xmlw.WriteAttributeString("Count", xefs.Count.ToStringSafe());
@@ -108,7 +100,7 @@ namespace rpt_diff
             xmlw.WriteEndElement();
         }
 
-        public static void ProcessReportDefinition(ReportDefinition rd, XmlWriter xmlw)
+        public static void Process(ReportDefinition rd, XmlWriter xmlw)
         {
             xmlw.WriteStartElement("ReportDefinition");
             xmlw.WriteAttributeString("ReportKind", rd.ReportKind.ToStringSafe());
@@ -224,10 +216,10 @@ namespace rpt_diff
                         xmlw.WriteAttributeString("OriginalWidth", bfo.OriginalWidth.ToStringSafe());
                         xmlw.WriteAttributeString("XScaling", bfo.XScaling.ToStringSafe());
                         xmlw.WriteAttributeString("YScaling", bfo.YScaling.ToStringSafe());
-                        ProcessPictureFormat(bfo.PictureFormat,xmlw);
+                        ProcessPictureFormat(bfo.PictureFormat, xmlw);
                         break;
                     }
-                case CrReportObjectKindEnum.crReportObjectKindBox: 
+                case CrReportObjectKindEnum.crReportObjectKindBox:
                     {
                         BoxObject bo = (BoxObject)ro;
                         xmlw.WriteAttributeString("Bottom", bo.Bottom.ToStringSafe());
@@ -406,12 +398,12 @@ namespace rpt_diff
                     }
                 case CrFieldValueTypeEnum.crFieldValueTypeDateField:
                     {
-                        ProcessDateFormat(ff.DateFormat, xmlw); 
+                        ProcessDateFormat(ff.DateFormat, xmlw);
                         break;
                     }
                 case CrFieldValueTypeEnum.crFieldValueTypeDateTimeField:
                     {
-                        ProcessDateTimeFormat(ff.DateTimeFormat, xmlw);    
+                        ProcessDateTimeFormat(ff.DateTimeFormat, xmlw);
                         break;
                     }
                 case CrFieldValueTypeEnum.crFieldValueTypeCurrencyField:
@@ -438,7 +430,7 @@ namespace rpt_diff
                     }
                 default:
                     {
-                        
+
                         break;
                     }
             }
@@ -485,7 +477,7 @@ namespace rpt_diff
             xmlw.WriteAttributeString("DayFormat", dff.DayFormat.ToStringSafe());
             xmlw.WriteAttributeString("DayOfWeekPosition", dff.DayOfWeekPosition.ToStringSafe());
             xmlw.WriteAttributeString("DayOfWeekSeparator", dff.DayOfWeekSeparator.ToStringSafe());
-            xmlw.WriteAttributeString("DayOfWeekType", dff.DayOfWeekType.ToStringSafe());            
+            xmlw.WriteAttributeString("DayOfWeekType", dff.DayOfWeekType.ToStringSafe());
             xmlw.WriteAttributeString("EraType", dff.EraType.ToStringSafe());
             xmlw.WriteAttributeString("MonthFormat", dff.MonthFormat.ToStringSafe());
             xmlw.WriteAttributeString("SystemDefaultType", dff.SystemDefaultType.ToStringSafe());
@@ -503,10 +495,10 @@ namespace rpt_diff
             xmlw.WriteAttributeString("EraTypeFormula", dff.ConditionFormulas[CrDateFieldFormatConditionFormulaTypeEnum.crDateFieldFormatConditionFormulaTypeEraType].Text);
             xmlw.WriteAttributeString("MonthFormatFormula", dff.ConditionFormulas[CrDateFieldFormatConditionFormulaTypeEnum.crDateFieldFormatConditionFormulaTypeMonthFormat].Text);
             xmlw.WriteAttributeString("SystemDefaultTypeFormula", dff.ConditionFormulas[CrDateFieldFormatConditionFormulaTypeEnum.crDateFieldFormatConditionFormulaTypeSystemDefaultType].Text);
-            xmlw.WriteAttributeString("YearFormatFormula", dff.ConditionFormulas[CrDateFieldFormatConditionFormulaTypeEnum.crDateFieldFormatConditionFormulaTypeYearFormat].Text);          
+            xmlw.WriteAttributeString("YearFormatFormula", dff.ConditionFormulas[CrDateFieldFormatConditionFormulaTypeEnum.crDateFieldFormatConditionFormulaTypeYearFormat].Text);
             xmlw.WriteEndElement();
         }
-        
+
         private static void ProcessNumericFormat(NumericFieldFormat nff, XmlWriter xmlw)
         {
             xmlw.WriteStartElement("NumericFieldFormat");
@@ -537,7 +529,7 @@ namespace rpt_diff
             xmlw.WriteAttributeString("RoundingFormatFormula", nff.ConditionFormulas[CrNumericFieldFormatConditionFormulaTypeEnum.crNumericFieldFormatConditionFormulaTypeRoundingFormat].Text);
             xmlw.WriteAttributeString("ThousandsSeparatorFormula", nff.ConditionFormulas[CrNumericFieldFormatConditionFormulaTypeEnum.crNumericFieldFormatConditionFormulaTypeThousandsSeparator].Text);
             xmlw.WriteAttributeString("ThousandSymbolFormula", nff.ConditionFormulas[CrNumericFieldFormatConditionFormulaTypeEnum.crNumericFieldFormatConditionFormulaTypeThousandSymbol].Text);
-            xmlw.WriteAttributeString("ZeroValueStringFormula", nff.ConditionFormulas[CrNumericFieldFormatConditionFormulaTypeEnum.crNumericFieldFormatConditionFormulaTypeZeroValueString].Text);           
+            xmlw.WriteAttributeString("ZeroValueStringFormula", nff.ConditionFormulas[CrNumericFieldFormatConditionFormulaTypeEnum.crNumericFieldFormatConditionFormulaTypeZeroValueString].Text);
             xmlw.WriteEndElement();
         }
 
@@ -549,7 +541,7 @@ namespace rpt_diff
             xmlw.WriteAttributeString("MaxNumberOfLines", sff.MaxNumberOfLines.ToStringSafe());
             xmlw.WriteAttributeString("ReadingOrder", sff.ReadingOrder.ToStringSafe());
             xmlw.WriteAttributeString("TextFormat", sff.TextFormat.ToStringSafe());
-            ProcessIndentAndSpacingFormat(sff.IndentAndSpacingFormat,xmlw);
+            ProcessIndentAndSpacingFormat(sff.IndentAndSpacingFormat, xmlw);
             xmlw.WriteEndElement();
         }
 
@@ -566,7 +558,7 @@ namespace rpt_diff
 
         private static void ProcessTimeFormat(TimeFieldFormat tff, XmlWriter xmlw)
         {
-            
+
             xmlw.WriteStartElement("TimeFieldFormat");
             xmlw.WriteAttributeString("AMPMFormat", tff.AMPMFormat.ToStringSafe());
             xmlw.WriteAttributeString("AMString", tff.AMString);
@@ -671,6 +663,6 @@ namespace rpt_diff
             xmlw.WriteAttributeString("RecordNumberPerPageFormula", sf.ConditionFormulas[CrSectionAreaFormatConditionFormulaTypeEnum.crSectionAreaConditionFormulaTypeRecordNumberPerPage].Text);
             xmlw.WriteEndElement();
         }
-        
+
     }
 }

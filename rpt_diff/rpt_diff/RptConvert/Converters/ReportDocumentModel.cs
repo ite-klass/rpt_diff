@@ -1,23 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
-
 using CrystalDecisions.CrystalReports.Engine;
 using CrystalDecisions.Shared;
 
-using ExtensionMethods;
-
-namespace rpt_diff
+namespace rpt_diff.RptConvert.Converters
 {
     /*
     *  ReportDocumentModel
     *  - older
-    *  - not include custom formulas 
+    *  - not include custom formulas
     */
-    class ReportDocumentModel
+    public class ReportDocumentModel
     {
         public static void ProcessReport(ReportDocument report, XmlWriter xmlw, string reportDoc = "ReportDocument")
         {
@@ -30,7 +23,7 @@ namespace rpt_diff
                 xmlw.WriteAttributeString("HasSavedData", report.HasSavedData.ToStringSafe());
                 xmlw.WriteAttributeString("IsLoaded", report.IsLoaded.ToStringSafe());
                 xmlw.WriteAttributeString("IsRPTR", report.IsRPTR.ToStringSafe());
-                xmlw.WriteAttributeString("ReportAppServer", report.ReportAppServer);// <EMBEDDED_REPORT_ENGINE> 
+                xmlw.WriteAttributeString("ReportAppServer", report.ReportAppServer);// <EMBEDDED_REPORT_ENGINE>
             }
             xmlw.WriteAttributeString("IsSubreport", report.IsSubreport.ToStringSafe());
             xmlw.WriteAttributeString("Name", report.Name);
@@ -274,7 +267,7 @@ namespace rpt_diff
             }
             catch (NotSupportedException) //IsLinked not supported in subreport
             { }
-           
+
             xmlw.WriteAttributeString("Kind", pfd.Kind.ToStringSafe());
             xmlw.WriteAttributeString("MaximumValue", pfd.MaximumValue.ToStringSafe());
             xmlw.WriteAttributeString("MinimumValue", pfd.MinimumValue.ToStringSafe());
@@ -364,13 +357,11 @@ namespace rpt_diff
         }
         private static string ProcessCondition(object condition)
         {
-            FieldDefinition dfdCondition = condition as FieldDefinition;
-            Group gCondition = condition as Group;
-            if (dfdCondition != null) // Field
+            if (condition is FieldDefinition dfdCondition) // Field
             {
                 return dfdCondition.FormulaName;
             }
-            else if (gCondition != null) // Group
+            else if (condition is Group gCondition) // Group
             {
                 return gCondition.ConditionField.FormulaName;
             }
@@ -392,8 +383,7 @@ namespace rpt_diff
         }
         private static void ProcessSortField(SortField sf, XmlWriter xmlw)
         {
-            TopBottomNSortField tbnsf = sf as TopBottomNSortField;
-            if (tbnsf != null)
+            if (sf is TopBottomNSortField tbnsf)
             {
                 xmlw.WriteStartElement("TopBottomNSortField");
                 xmlw.WriteAttributeString("EnableDiscardOtherGroups", tbnsf.EnableDiscardOtherGroups.ToStringSafe());
@@ -685,7 +675,7 @@ namespace rpt_diff
             //{
             ProcessCommonFormat(ff.CommonFormat, xmlw);
             //}
-            //else if (ff.DateTimeFormat != null)//datetime before date and time 
+            //else if (ff.DateTimeFormat != null)//datetime before date and time
             //{
             ProcessDateTimeFormat(ff.DateTimeFormat, xmlw);
             //}

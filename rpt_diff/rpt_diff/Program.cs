@@ -1,152 +1,78 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Drawing;
 using System.Diagnostics;
 using System.IO;
+using rpt_diff.RptConvert;
 
 namespace rpt_diff
 {
     static class Program
     {
-        /*
-         * All return codes
-         */
-        enum ExitCode : int
-        {
-            Success = 0,
-            WrongDiffApp = 1,
-            WrongRptFile = 2,
-            WrongArgs    = 3,
-            WrongModel   = 4,
-            ConvertError = 5
-        }
-        /*
-         * The main entry point for the application.
-         */
         [STAThread]
         static int Main(string[] args)
         {
-            string diffPath = "", xmlFilePath1 ="", xmlFilePath2 = "";
-            int ModelNumber = 0;
-            switch (args.Length)
+            var par = ProgramParams.Parse(args);
+            if (par == null)
             {
-                case 3:
-                    {
-                        if (!File.Exists(args[1]))
-                        {
-                            Console.Error.WriteLine("Error: Can't find RPT file - Bad RPTPath1");
-                            WriteUsage();
-                            return (int)ExitCode.WrongRptFile;
-                        }
-                        if(!Int32.TryParse(args[2], out ModelNumber)||(ModelNumber!= 0&&ModelNumber!=1))
-                        {   
-                            Console.Error.WriteLine("Error: Wrong ModelNumber select - must be 0 or 1");
-                            WriteUsage();
-                            return (int)ExitCode.WrongModel;
-                        }
-                        Console.WriteLine("Using object model: \"" + ((ModelNumber==0)?"ReportDocument":"ReportClientDocument") + "\"");
-                        Console.WriteLine("Converting file: \"" + args[1]+"\"");
-                        try
-                        {
-                            xmlFilePath1 = RptToXml.ConvertRptToXml(args[1], ModelNumber);
-                        }
-                        catch(Exception e)
-                        {
-                            Console.Error.WriteLine("Error: Convert to XML error");
-                            Console.Error.WriteLine(e);
-                            return (int)ExitCode.ConvertError;
-                        }
-                        Console.WriteLine("File \"" + args[1] + "\" converted to \"" + xmlFilePath1 + "\"");
-                        break;
-                    }
-                case 4:
-                    {
-                        if (!File.Exists(args[1]))
-                        {
-                            Console.Error.WriteLine("Error: Can't find RPT file - Bad RPTPath1");
-                            WriteUsage();
-                            return (int)ExitCode.WrongRptFile;
-                        }
-                        if(!Int32.TryParse(args[3], out ModelNumber)||(ModelNumber!= 0&&ModelNumber!=1))
-                        {   
-                            Console.Error.WriteLine("Error: Wrong ModelNumber select - must be 0 or 1");
-                            WriteUsage();
-                            return (int)ExitCode.WrongModel;
-                        }
-                        Console.WriteLine("Using object model: \"" + ((ModelNumber == 0) ? "ReportDocument" : "ReportClientDocument") + "\"");
-                        Console.WriteLine("Converting file: \"" + args[1] + "\"");
-                        try
-                        {
-                            xmlFilePath1 = RptToXml.ConvertRptToXml(args[1], ModelNumber);
-                        }
-                        catch (Exception e)
-                        {
-                            Console.Error.WriteLine("Error: Convert to XML error");
-                            Console.Error.WriteLine(e);
-                            return (int)ExitCode.ConvertError;
-                        }
-                        Console.WriteLine("File \"" + args[1] + "\" converted to \"" + xmlFilePath1+"\"");
-                        if (!File.Exists(args[2]))
-                        {
-                            Console.Error.WriteLine("Error: Can't find RPT file - Bad RPTPath2");
-                            WriteUsage();
-                            return (int)ExitCode.WrongRptFile;
-                        }
-                        Console.WriteLine("Converting file: \"" + args[2] + "\"");
-                        try
-                        {
-                            xmlFilePath2 = RptToXml.ConvertRptToXml(args[2], ModelNumber);
-                        }
-                        catch (Exception e)
-                        {
-                            Console.Error.WriteLine("Error: Convert to XML error");
-                            Console.Error.WriteLine(e);
-                            return (int)ExitCode.ConvertError;
-                        }
-                        Console.WriteLine("File \"" + args[2] + "\" converted to \"" + xmlFilePath2 + "\"");
-                        break;
-                    }
-                default:
-                    {
-                        Console.Error.WriteLine("Error: Wrong number of parameters");
-                        WriteUsage();
-                        return (int)ExitCode.WrongArgs;
-                    }
+                Console.Error.WriteLine("Error: Wrong number of parameters");
+                ProgramParams.WriteUsage();
+                return (int)ProgramExitCode.WrongArgs;
             }
-            if (!File.Exists(args[0]))
-            {
-                Console.Error.WriteLine("Error: Unknown diff application - Bad DiffUtilPath");
-                WriteUsage();
-                return (int)ExitCode.WrongDiffApp;
-            }
-            diffPath = args[0];
-            Console.WriteLine("Starting diff application: \"" + diffPath+"\"");
-            Process diffProc = Process.Start(diffPath, String.Format("\"{0}\" \"{1}\"", xmlFilePath1, xmlFilePath2));
-            diffProc.WaitForExit(); 
-            Console.WriteLine("Diff application exited");
+            var err = par.Validate();
+            if (err != null) return (int)err.Value;
+
+            if (!TryConvertRptFiles(par, out var xml1Path, out var xml2Path)) return ReturnConvertError(par.Rpt1Path);
+
+            Debug.WriteLine(value: $@"Starting diff application: ""{par.DiffToolPath}""");
+            Process diffProc = Process.Start(par.DiffToolPath, $@"""{xml1Path}"" ""{xml2Path}""");
+            diffProc.WaitForExit();
+
             // delete xml files after closing diff application
-            if (File.Exists(xmlFilePath1))
+            if (File.Exists(xml1Path))
             {
-                Console.WriteLine("Deleting file: \"" + xmlFilePath1 + "\"");
-                File.Delete(xmlFilePath1);
+                Debug.WriteLine($@"Deleting file: ""{xml1Path}""");
+                File.Delete(xml1Path);
             }
-            if (File.Exists(xmlFilePath2))
+            if (File.Exists(xml2Path))
             {
-                Console.WriteLine("Deleting file: \"" + xmlFilePath2 + "\"");
-                File.Delete(xmlFilePath2);
+                Debug.WriteLine($@"Deleting file: ""{xml2Path}""");
+                File.Delete(xml2Path);
             }
-            
-            return (int)ExitCode.Success;            
+
+            return (int)ProgramExitCode.Success;
         }
-        static void WriteUsage()
+
+        private static bool TryConvertRptFiles(ProgramParams par, out string xml1Path, out string xml2Path)
         {
-            Console.WriteLine("Usage: rpt_diff.exe DiffUtilPath RPTPath1 [RPTPath2] ModelNumber");
-            Console.WriteLine("       DiffUtilPath - Full path to external diff application .exe file that can compare two xml files (for example KDiff)");
-            Console.WriteLine("       RPTPath1 - Full path to first .rpt file to be converted to xml");
-            Console.WriteLine("       RPTPath2 - Full path to second .rpt file to be converted to xml and compared with first file");
-            Console.WriteLine("       ModelNumber - Select between object model 0 - ReportDocument or 1 (recomended)- ReportClientDocument ");
+            xml2Path = null;
+
+            if (!TryConvert(par.Rpt1Path, par.ModelType, out xml1Path)) return false;
+            Debug.WriteLine($@"File ""{par.Rpt1Path}"" converted to ""{xml1Path}""");
+
+            xml2Path = "";
+            if (par.Rpt2Path != null && !TryConvert(par.Rpt2Path, par.ModelType, out xml2Path)) return false;
+
+            return true;
+        }
+
+        private static int ReturnConvertError(string rptPath)
+        {
+            Console.Error.WriteLine($"Error: Convert to XML error on {rptPath}");
+            return (int)ProgramExitCode.ConvertError;
+        }
+
+        private static bool TryConvert(string rpt1Path, ModelType modelType, out string xmlPath)
+        {
+            try
+            {
+                xmlPath = RptToXml.ConvertRptToXml(rpt1Path, modelType);
+                return true;
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e);
+                xmlPath = null;
+                return false;
+            }
         }
     }
 }
