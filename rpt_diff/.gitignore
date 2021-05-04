@@ -1,2 +1,4 @@
 .vs
 *.csproj.user
+/rpt_diff/bin
+/rpt_diff/obj
