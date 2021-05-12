@@ -1,6 +1,7 @@
 ﻿using System.Xml;
 using CrystalDecisions.ReportAppServer.ReportDefModel;
 using CrystalDecisions.ReportAppServer.DataDefModel;
+using System;
 
 namespace rpt_diff.RptConvert.Converters
 {
@@ -334,6 +335,29 @@ namespace rpt_diff.RptConvert.Converters
             xmlw.WriteStartElement("ParagraphElement");
             xmlw.WriteElementString("Kind", p.Kind.ToStringSafe());
             ProcessFontColor(p.FontColor, xmlw);
+            switch (p.Kind)
+            {
+                case CrParagraphElementKindEnum.crParagraphElementKindText:
+                    if (p is ParagraphTextElement pText)
+                    {
+                        xmlw.WriteElementString("Text", pText.Text);
+                    }
+                    break;
+                case CrParagraphElementKindEnum.crParagraphElementKindField:
+                    if (p is ParagraphFieldElement pField)
+                    {
+                        if (pField is FieldObject pFieldObject)
+                        {
+                            ProcessFieldFormat(pField.FieldFormat, xmlw, pFieldObject.FieldValueType);
+                        }
+                        xmlw.WriteElementString("FieldDataSource", pField.DataSource);
+                    }
+                    break;
+                case CrParagraphElementKindEnum.crParagraphElementKindTab:
+                default:
+                    Console.Error.WriteLine($"Unhandled ParagraphElement Kind {p.Kind} {p.ClassName}");
+                    break;
+            }
             xmlw.WriteEndElement();
         }
 
